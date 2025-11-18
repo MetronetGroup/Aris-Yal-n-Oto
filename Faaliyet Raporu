@@ -1,4 +1,4 @@
-exec aris_MCEK_BEKLEYEN_BAKIYE_exec
+exec aris_BCEK_BEKLEYEN_BAKIYE_exec
 exec aris_KDV_DAHIL_GENELTOPLAM_exec
 exec aris_kasakalan_exec
 exec aris_bankabakiyeler_exec
