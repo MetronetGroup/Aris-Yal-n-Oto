@@ -16,3 +16,7 @@ exec Aris_Borc_Alacak_exec
 
 --Stok Karlılık analizi raporu--
 exec aris_stok_karlılık_analizi_exec @Ay=2
+
+
+--plasiyer satış--
+exec aris_plasiyersatıs_RAPORU_exec @Ay=2
