@@ -20,3 +20,23 @@ exec aris_stok_karlılık_analizi_exec @Ay=2
 
 --plasiyer satış--
 exec aris_plasiyersatıs_RAPORU_exec @Ay=2
+--Sipariş--
+  Aris_OTIF_Musteri_siparis_performans 3, 6, 0;
+
+  Aris_OTIF_SatirDetay_siparis_performans
+@Baslangic=3,
+@Bitis=5,
+@ToleransGun = 2;
+
+
+
+ Aris_OTIF_Stok_siparis_performans
+@Baslangic=3,
+@Bitis=5,
+@ToleransGun = 2;
+
+
+ Aris_OTIF_Aylik_siparis_teslimat 
+    @BaslangicAy = 3,
+    @BitisAy     = 5,
+    @ToleransGun = 2;
