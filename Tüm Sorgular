@@ -36,6 +36,7 @@ exec aris_plasiyersatıs_RAPORU_exec @Ay=2
 @ToleransGun = 2;
 
 exec aris_MCEK_TAHSIL_exec
+exec aris_MSENET_PORTFOY_exec
 
 
  Aris_OTIF_Aylik_siparis_teslimat 
