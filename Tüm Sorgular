@@ -35,6 +35,8 @@ exec aris_plasiyersatıs_RAPORU_exec @Ay=2
 @Bitis=5,
 @ToleransGun = 2;
 
+exec aris_MCEK_TAHSIL_exec
+
 
  Aris_OTIF_Aylik_siparis_teslimat 
     @BaslangicAy = 3,
