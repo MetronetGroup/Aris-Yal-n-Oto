@@ -1,0 +1,3129 @@
+{
+  "name": "özel agent yalçın oto",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1776,
+        1888
+      ],
+      "id": "4f4e6396-5d22-4372-a51f-58b06fa3bbec",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "F3qnz7H0QSYVapmS",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.data.message.conversation }}",
+        "options": {
+          "systemMessage": "=Sen bir sanal asistansın. Görevin kullanıcıyla etkileşimde bulunmak ve doğru rapor akışını yönetmek.\n\n1️⃣ Karşılama Mesajı (Kullanıcı ilk mesaj gönderdiğinde)\n\nKullanıcıya şu mesaj gösterilecek:\n\nMerhaba {{ $json.body.data.pushName }} ! Ben Aris,  \nSizin için yapabileceklerim:\n\n🟦A. AbcXyz Analizi Raporu \n🟦B. 12 Aylık Satış Analiz Raporu\n🟦C. Stok Fifo Raporu  \n🟦D. Nakit Akış Raporu   \n🟦E. Takvim Bazında Yaşlandırma Raporu \n🟦F. Günlük Tahsilat/ödemeler Raporu  \n🟦G. Plasiyer Borc/Alacak Raporu\n🟦H. Sipariş Öneri Raporu\n\nHangisini tercih edersiniz?\n\n\n\nTemel Kurallar:\nİlk Mesajda memoryden almayacaksın aynı şekilde aşarıdaki mesajı olacak \nMerhaba {{ $json.body.data.pushName }} ! Ben Aris,  \nSizin için yapabileceklerim:\n\n🟦A. AbcXyz Analizi Raporu \n🟦B. 12 Aylık Satış Analiz Raporu\n🟦C. Stok Fifo Raporu  \n🟦D. Nakit Akış Raporu   \n🟦E. Takvim Bazında Yaşlandırma Raporu \n🟦F. Günlük Tahsilat/ödemeler Raporu  \n🟦G. Plasiyer Borc/Alacak Raporu\n🟦H. Sipariş Öneri Raporu\n\n\n\n\n---------------------------------------------------------\nKullanıcı A–G yazabilir veya raporun tam adını yazabilir.\nSeçilen harf rapor adlarına şu şekilde çevrilir:\n\nÖnemli Not : Kullanıcıyı Herzaman bir sanki müşteri hizmetleri gibi konuş\nKod\tRapor Adı\nA\tStoklar için AbcXyz Analizi\nB\t12 Aylık Satış Analiz Raporu\nC\tStok Fifo Raporu\nD\tNakit Akış Raporu\nE\tTakvim Bazında Yaşlandırma Raporu\nF   Günlük Tahsilat/ödemeler Raporu \nG   Plasiyer Borc/Alacak Raporu\nH   Sipariş Öneri Raporu\n\n\n\n📌 Eğer kullanıcı G ya da “Grup Bazında Aylık Plasiyer Satış Raporu veya Z yada Stok Karlılık Analiz Raporu ” seçtiyse şu soru sorulacak:\n\n“Hangi ay için rapor almak istiyorsunuz?”\n\n3️⃣ Ay algılama kuralları\n\nKullanıcı ayı yazıyla yazarsa aşağıdaki eşleşme yapılır:\n\nOcak → 1\n\nŞubat → 2\n\nMart → 3\n\nNisan → 4\n\nMayıs → 5\n\nHaziran → 6\n\nTemmuz → 7\n\nAğustos → 8\n\nEylül → 9\n\nEkim → 10\n\nKasım → 11\n\nAralık → 12\n\nKullanıcı 1–12 arasında bir sayı yazarsa doğrudan ay kabul edilir.\n\nHatalı veya ay içermeyen ifade girilirse:\n\n\"ay\": \"Geçerli bir ay bilgisi bulunamadı.\"\n\n📌 Eğer kullanıcı G ya da “Plasiyer Borc/Alacak Raporu” seçtiyse şu soru sorulacak:\n\nPlasiyer Borc/Alacak Raporunu Hangisi İçin almak istersiniz.\n1.Cari Borç Alacak\n2.Cari Kartdaki tanımlı plasiyere göre borç alacak\n3.Cari Hareketlerindeki plasiyere göre borç alacak\n\nKullanıcı 1-3 veya isim olarak hangisini seçerse artık category adı seçtiği isim olacak ve output hangsini seçtiyse onu hazırlıyorum çıktı vereceksin.\n\n📌 Eğer kullanıcı A ya da “ AbcXyz Analizi Raporu” seçtiyse şu soru sorulacak:\n\nAbcXyz Raporunu Hangisi İçin almak istersiniz.\n1.Stoklar için AbcXyz Analizi \n2.Cariler için AbcXyz Analizi \n\nKullanıcı 1-2 veya isim olarak hangisini seçerse artık category adı seçtiği isim olacak ve output hangsini seçtiyse onu hazırlıyorum çıktı vereceksin.\n\n\n\n4️⃣ JSON Çıktı Kuralları\n\nHer zaman 3 alan bulunacak:\n\ncategory → her zaman kullanıcının seçtiği rapor adı  \nay → ay numarası (1–12) veya hata mesajı  \nmesaj → \"<category> raporunu sizin için hazırlıyorum\"\n\n✅ 🔵 ÖRNEK FİNAL JSON (İSTEDİĞİN FORMAT)\n\nKullanıcı: “G”\nSonra: “Mayıs”\n\n{\n  \"category\": \"Plasiyer Aylık Satış Raporu\",\n  \"ay\": 5,\n  \"mesaj\": \"Plasiyer Aylık Satış Raporu raporunu sizin için hazırlıyorum\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1744,
+        1712
+      ],
+      "id": "cf0bf4c6-afa4-4945-9769-5c032a3b7868",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gelen veriyi al\nconst item = $json.data?.[0] || $json;\n\n// Dinamik olarak tüm alanları stringe çevir\nlet message = \"\";\nfor (const [key, value] of Object.entries(item)) {\n  message += `${key}: ${value}\\n`;\n}\n\n// Sonucu döndür\nreturn [\n  {\n    json: {\n      message\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        1744
+      ],
+      "id": "78f6253b-1720-42bd-a601-d831efebc2ff",
+      "name": "Data Parse"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f0a32bd2-526d-4474-8d63-b5fa413a66d7",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Stoklar için AbcXyz Analizi",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "abc"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ad58559a-38fd-45ce-8f71-1a581f7f2bfc",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Sipariş Öneri Raporu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sipariş Öneri Raporu"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6426648f-f620-4cd0-b1e0-3c369ae85c06",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Takvim Bazında Yaşlandırma Raporu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=takvimyaslandırma"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "73fd302a-2049-4a40-94ee-0c54ec7d6315",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Günlük Tahsilat/ödemeler Raporu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=Günlük Tahsilat/ödemeler"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cc951483-3a34-4484-85ea-807c5563e77d",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Cari Hareketlerindeki plasiyere göre borç alacak",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cari Hareketlerindeki"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8b305ed4-1195-47c1-a0d1-0949cd93585d",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Cari Kartdaki tanımlı plasiyere göre borç alacak",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cari Kartdaki"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fc81709a-5ed9-401c-a27d-e7d952458d9b",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Cari Borç Alacak",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cari Borç Alacak"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "92533fab-03bc-4331-aa06-31d4005928c2",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Cariler için AbcXyz Analizi",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cariabcxyz"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "72182d7e-133e-42a1-a6cf-fe7ed5ebdc3f",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "12 Aylık Satış Analiz Raporu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "12 Aylık Satış Analiz Raporu"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c385a55d-cc4c-481e-8965-0baa4d593027",
+                    "leftValue": "={{ $('Category').item.json.category }}",
+                    "rightValue": "Nakit Akış Raporu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nakit Akış Raporu"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -640,
+        1680
+      ],
+      "id": "44aa40a7-e172-4af4-8dc2-151d5b497308",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"TakvimYaslandırma\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"TakvimYaslandırma.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        1744
+      ],
+      "id": "d2a73a33-edde-420b-9c57-2a1765f99000",
+      "name": "Excel1"
+    },
+    {
+      "parameters": {
+        "name": "Takvim Yaşlandırma",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        144,
+        1744
+      ],
+      "id": "c31dd766-7f1e-4b0a-b9f4-853cb122f0ef",
+      "name": "excel upload1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "DEFCA8DF2C0D-4BB3-B874-E6C2A253D6BF",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2192,
+        1696
+      ],
+      "id": "e7577557-117e-4f19-9bb2-b6631c065384",
+      "name": "Webhook1",
+      "webhookId": "96f8460d-9e01-41c6-bc1f-ce28b46a9f46"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC dbo.Aris_ABC_XYZ_Cari\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        1440
+      ],
+      "id": "74da94f6-0a2f-447d-838b-d372b18dd942",
+      "name": "abcxyz"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"AbxXyz\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"AbcXyz.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        1440
+      ],
+      "id": "dcc04b23-25df-4485-9f45-a3991b334001",
+      "name": "Excel"
+    },
+    {
+      "parameters": {
+        "name": "AbcXyz Stok Raporu",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -16,
+        1440
+      ],
+      "id": "96cf2cb8-0c68-4c41-a712-34205c6877c4",
+      "name": "excel upload",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_banka_bakiye_toplamı_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        -128
+      ],
+      "id": "f5e18c57-f2bb-4b68-a787-8b0eb6ef78d0",
+      "name": "Banka Bakiye"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_MCEK_TAHSIL_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        48
+      ],
+      "id": "e656296a-3ba0-4481-9d72-64e0994de60a",
+      "name": "mcektahsil"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"aris_MSENET_PORTFOY_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -832,
+        48
+      ],
+      "id": "a5780a6f-5c78-4c22-a5d4-f3fd4d6a2885",
+      "name": "msenetportfoy"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \" exec aris_MSENET_TAHSIL_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -640,
+        -128
+      ],
+      "id": "15892476-ccf6-4c54-9fa6-2a523ea5f03c",
+      "name": "msenettahsil"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"SELECT SUM(cm_borct-cm_alact) as alıcı_cariBorc FROM TBLCASABIT WHERE CARI_TIP='A'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -640,
+        64
+      ],
+      "id": "f293a57c-7e74-44e7-b583-2649a94980fb",
+      "name": "Alıcılarbakiye"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"SELECT SUM(cm_borct-cm_alact) as Satıcı_cariBorc FROM TBLCASABIT WHERE CARI_TIP='S'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        64
+      ],
+      "id": "5e0e7d64-2d15-48f2-804e-668403d2fdf9",
+      "name": "Satıcıcaribakiye"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sayıyı ondalıksız hale getirip binlikleri noktayla ayırır ve ₺ ekler\nfunction formatNumberWithDotsTL(value) {\n  const num = parseFloat(value);\n  if (isNaN(num)) return \"0 ₺\";\n  return Math.round(num).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, \".\") + \" ₺\";\n}\n\n// Sayısal işlem için güvenli sayı dönüştürme\nfunction safeNumber(value) {\n  const num = parseFloat(value);\n  return isNaN(num) ? 0 : num;\n}\n\n// Verileri al\nconst bankabakiye_raw = $('Banka Bakiye').first().json.data[0].bankaBAKIYE;\nconst mcekportfoy_raw = $('mcekportfoy').first().json.data[0].MCEKT;\nconst mcektahsil_raw = $('msenettahsil').first().json.data[0].MSENET_TAHSIL;\nconst msenetportfoy_raw = $('msenetportfoy').first().json.data[0].MSENET_PORTFOY;\nconst msenettahsil_raw = $('msenettahsil').first().json.data[0].MSENET_TAHSIL;\nconst alıcılarbakiye_raw = $('Alıcılarbakiye').first().json.data[0]['alıcı_cariBorc'];\nconst satıcıbakiye_raw = $input.first().json.data[0]['Satıcı_cariBorc'];\nconst kasakalanbakiye_raw=$('Kasa Kalan').first().json.data[0].Kasa_kalan;\nconst kredikartıbakiye_raw = $('KrediKartıBAKIYE').first().json.data[0]['KrediKartıBAKIYE'];\nconst mcek_bekleyen = $('mcek_bekleyen').first().json.data[0].MCEK_BEKLEYEN_BAKIYE;\nconst KDVdahilgenelToplam = $input.first().json.data[0].KDV_DAHIL_GENELTOPLAM;\n\n// Toplam hesaplama\nconst toplam = \n  safeNumber(bankabakiye_raw) +\n  safeNumber(mcekportfoy_raw) +\n  safeNumber(mcektahsil_raw) +\n  safeNumber(msenetportfoy_raw) +\n  safeNumber(msenettahsil_raw) +\n  safeNumber(alıcılarbakiye_raw) +\n  safeNumber(satıcıbakiye_raw) +\n  safeNumber(kasakalanbakiye_raw) +\n  safeNumber(kredikartıbakiye_raw) +\n  safeNumber(mcek_bekleyen) +\n  safeNumber(KDVdahilgenelToplam) ;\n\n// Genel durum belirleme\nlet genelDurum = \"\";\nif (toplam > 0) genelDurum = \"💰 İşletme genel olarak artıda.\";\nelse if (toplam < 0) genelDurum = \"📉 İşletme genel olarak ekside.\";\nelse genelDurum = \"⚖️ İşletme dengede.\";\n\n// Ana rapor nesnesi (TL ile)\nconst faaliyetRaporu = {\n  \"Banka Bakiyesi\": formatNumberWithDotsTL(bankabakiye_raw),\n  \"Müşteri Çek Portföyü\": formatNumberWithDotsTL(mcekportfoy_raw),\n  \"Müşteri Çek Tahsilat\": formatNumberWithDotsTL(mcektahsil_raw),\n  \"Müşteri Senet Portföyü\": formatNumberWithDotsTL(msenetportfoy_raw),\n  \"Müşteri Senet Tahsilat\": formatNumberWithDotsTL(msenettahsil_raw),\n  \"Alıcılar Bakiyesi\": formatNumberWithDotsTL(alıcılarbakiye_raw),\n  \"Satıcılar Bakiyesi\": formatNumberWithDotsTL(satıcıbakiye_raw),\n  \"Kasa kalan Bakiyesi\" : formatNumberWithDotsTL(kasakalanbakiye_raw),\n  \"Kredi Kartı Bakiyesi\":formatNumberWithDotsTL(kredikartıbakiye_raw),\n  \"Müşteri Çeki Bekleyen\":formatNumberWithDotsTL(mcek_bekleyen),\n  \"Kdv Genel Toplam\":formatNumberWithDotsTL(KDVdahilgenelToplam),\n  \"Toplam Genel Durum\": formatNumberWithDotsTL(toplam),\n  \"Durum Yorumu\": genelDurum\n};\n\n// JSON olarak döndür\nreturn [\n  {\n    json: {\n      \"Faaliyet Raporu Analiz Sonucu\": faaliyetRaporu\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -128
+      ],
+      "id": "37cd0da5-f8fe-4d36-9b57-dc13178c616a",
+      "name": "İçerik Düzenleme"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rapor =$input.first().json['Faaliyet Raporu Analiz Sonucu']\n\n// Mesajı oluştur\nlet mesaj = \"*📊 Faaliyet Raporu Analiz Sonucu*\\n\\n\";\nfor (let key in rapor) {\n  mesaj += `*${key}:* ${rapor[key]}\\n`;\n}\n\nreturn [\n  {\n    json: {\n      \"whatsappMessage\": mesaj\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "e5c82bf4-42f6-4f1e-a8f6-8f46b745a0b1",
+      "name": "Whatsapp Message"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $json.whatsappMessage }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        160
+      ],
+      "id": "7e3fcd19-badd-45a4-832d-5d8e8f81a3a6",
+      "name": "Faliyet Raporu Sonuç Gönderme",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \" exec aris_kasakalan_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        -128
+      ],
+      "id": "635184b9-fede-43cc-b5a2-625c4289a5b2",
+      "name": "Kasa Kalan"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"select ISNULL(SUM(BAKIYE),0) AS KrediKartıBAKIYE from mtr_BANKABAKIYELER WHERE HESAPSEKLI='Kredi Karti'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        -128
+      ],
+      "id": "00a52809-5974-412d-9647-e0726154d957",
+      "name": "KrediKartıBAKIYE"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_BCEK_BEKLEYEN_BAKIYE_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "e551427f-9d51-4006-a357-8392207f7392",
+      "name": "mcek_bekleyen"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \" exec aris_KDV_DAHIL_GENELTOPLAM_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        160
+      ],
+      "id": "578890d3-d49e-46cb-95ad-3d01d409803a",
+      "name": "KDV dahil genel toplam"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_plasiyersatıs_RAPORU_exec @Ay ={{ $('Category').item.json.ay }}\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -208,
+        448
+      ],
+      "id": "410cf912-0134-4fce-b113-1f274786d94c",
+      "name": "PlasiyerAylıkSatısRaporu"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${JSON.stringify(input,null,2)}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariEkstra\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${h}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${val}</Data></Cell>`;\n  }\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"AbcXyz.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        448
+      ],
+      "id": "22a9b69e-e013-4950-9efa-49dc141496c1",
+      "name": "Excel2"
+    },
+    {
+      "parameters": {
+        "name": "Plasiyer Aylık Satış Raporu",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        176,
+        448
+      ],
+      "id": "4a0edcbf-bbb1-4ce7-9478-6aaa58286f03",
+      "name": "excel upload2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "=Plasiyer Satış Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        352,
+        448
+      ],
+      "id": "4f6dae27-46fe-4c0a-b81c-79f12a616bcc",
+      "name": "Send text",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_mcek_portföy_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -864,
+        -128
+      ],
+      "id": "eb936123-acc8-464c-a3f4-2ca673da35ad",
+      "name": "mcekportfoy"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "null",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "daaf87f9-9c5f-4ae3-808f-d97bebef654b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "true"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e81b7330-e69c-4d6b-8b0f-f0af6e58a815",
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "null",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -1168,
+        1712
+      ],
+      "id": "e8d4e9e0-d16f-4907-85b8-3f36585e310f",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        1648
+      ],
+      "id": "a3254cf3-d43a-4531-bc20-e8fb2df475c8",
+      "name": "Merhaba Mesajı",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        1440
+      ],
+      "id": "2f9e0940-1318-4b9d-9d78-32fc664cdaad",
+      "name": "ABC",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        1744
+      ],
+      "id": "a4fd7f00-78e1-4a2c-ab1b-0f5f463a71ef",
+      "name": "YAŞLANDIRMA",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Code in JavaScript').item.json.category }}  Raporunuz Hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        2752
+      ],
+      "id": "642bc6a7-20d2-4bb1-97de-1e1653025e4e",
+      "name": "Send text1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\nlet items = Array.isArray(input) ? input : [input];\n\n// --- XML Kaçış Fonksiyonu (EN ÖNEMLİ DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\n// --- Başlıklar\nconst headers = [\n  \"CARI_KOD\",\n  \"ISIM\",\n  \"TARIH\",\n  \"VADE_TARIHI\",\n  \"TUTAR (Gelir)\",\n  \"TUTAR (Gider)\",\n  \"MODUL\"\n];\n\n// --- Sütun genişlikleri\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    let val = \"\";\n    switch(h) {\n      case \"TUTAR (Gelir)\":\n        val = item.DURUM === \"Gelir\" ? item.TUTAR : \"\";\n        break;\n      case \"TUTAR (Gider)\":\n        val = item.DURUM === \"Gider\" ? item.TUTAR : \"\";\n        break;\n      case \"TARIH\":\n        val = item.TARIH ? new Date(item.TARIH).toLocaleDateString(\"tr-TR\") : \"\";\n        break;\n      case \"VADE_TARIHI\":\n        val = item.VADE_TARIHI ? new Date(item.VADE_TARIHI).toLocaleDateString(\"tr-TR\") : \"\";\n        break;\n      default:\n        val = item[h] ?? \"\";\n    }\n    maxLen = Math.max(maxLen, val.toString().length);\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"HeaderStyle\">\n    <Font ss:Bold=\"1\"/>\n  </Style>\n  <Style ss:ID=\"TotalHeaderStyle\">\n    <Font ss:Bold=\"1\"/>\n    <Interior ss:Color=\"#FFFF00\" ss:Pattern=\"Solid\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"tahsilat_odemeler\">\n<Table>`;\n\n// --- Sütun genişlikleri\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell ss:StyleID=\"HeaderStyle\"><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Toplamlar\nlet toplamGelir = 0;\nlet toplamGider = 0;\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(item.CARI_KOD ?? \"\")}</Data></Cell>`;\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(item.ISIM ?? \"\")}</Data></Cell>`;\n\n  const tarihISO = item.TARIH ? new Date(item.TARIH).toISOString() : \"\";\n  xml += `<Cell ss:StyleID=\"DateStyle\"><Data ss:Type=\"DateTime\">${tarihISO}</Data></Cell>`;\n\n  const vadeISO = item.VADE_TARIHI ? new Date(item.VADE_TARIHI).toISOString() : \"\";\n  xml += `<Cell ss:StyleID=\"DateStyle\"><Data ss:Type=\"DateTime\">${vadeISO}</Data></Cell>`;\n\n  const tutarGelir = item.DURUM === \"Gelir\" ? item.TUTAR ?? 0 : \"\";\n  const tutarGider = item.DURUM === \"Gider\" ? item.TUTAR ?? 0 : \"\";\n\n  if (tutarGelir !== \"\") toplamGelir += parseFloat(tutarGelir);\n  if (tutarGider !== \"\") toplamGider += parseFloat(tutarGider);\n\n  xml += `<Cell ss:StyleID=\"CurrencyStyle\"><Data ss:Type=\"Number\">${tutarGelir}</Data></Cell>`;\n  xml += `<Cell ss:StyleID=\"CurrencyStyle\"><Data ss:Type=\"Number\">${tutarGider}</Data></Cell>`;\n\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(item.MODUL ?? \"\")}</Data></Cell>`;\n\n  xml += \"</Row>\";\n}\n\n// --- TOPLAM BAŞLIK SATIRI\nxml += \"<Row>\";\nxml += `<Cell/><Cell/><Cell/><Cell/>`;\nxml += `<Cell ss:StyleID=\"TotalHeaderStyle\"><Data ss:Type=\"String\">TOPLAM</Data></Cell>`;\nxml += `<Cell ss:StyleID=\"TotalHeaderStyle\"><Data ss:Type=\"String\">TOPLAM</Data></Cell>`;\nxml += `<Cell/>`;\nxml += \"</Row>\";\n\n// --- TOPLAM DEĞER SATIRI\nxml += \"<Row>\";\nxml += `<Cell/><Cell/><Cell/><Cell/>`;\nxml += `<Cell ss:StyleID=\"CurrencyStyle\"><Data ss:Type=\"Number\">${toplamGelir}</Data></Cell>`;\nxml += `<Cell ss:StyleID=\"CurrencyStyle\"><Data ss:Type=\"Number\">${toplamGider}</Data></Cell>`;\nxml += `<Cell/>`;\nxml += \"</Row>\";\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"tahsilat_odemeler.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        2752
+      ],
+      "id": "57d00bed-9724-428b-917b-d408acaf2581",
+      "name": "Excel3"
+    },
+    {
+      "parameters": {
+        "name": "Günlük Tahsilat/ödeme",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        2752
+      ],
+      "id": "2ee00189-08dd-4e01-bf6d-f613fb2b016d",
+      "name": "excel upload3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec sp_Aris_VadeBugun_TahsilatOdeme\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -976,
+        2752
+      ],
+      "id": "209124ab-3266-428e-a3bc-58807377b3f9",
+      "name": "ödeme/tahsilat"
+    },
+    {
+      "parameters": {
+        "content": "Faliyet",
+        "height": 480,
+        "width": 1216
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        -176
+      ],
+      "id": "60433318-513e-4d6f-8d5f-36f827c1da1a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec Aris_Borc_Alacak_Plasiyer_Carikart_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        2992
+      ],
+      "id": "cd91742d-2e3f-414e-9b95-07fe56fd6981",
+      "name": "Cari Kartdaki tanımlı plasiyere göre"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec Aris_Borc_Alacak_plasiyer_hareket_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        3200
+      ],
+      "id": "7afc4379-944c-40d7-9a84-2b90052e4d89",
+      "name": "Cari Hareketlerindeki plasiyere göre"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC Aris_Borc_Alacak_exec\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        3408
+      ],
+      "id": "4bf611ad-bcef-446f-910c-22bc12c3dfd0",
+      "name": "Cari Borç Alacak"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"Cari Kartdaki tanımlı plasiyere göre\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"Cari Kartdaki tanımlı plasiyere göre.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        2992
+      ],
+      "id": "1dd73995-6ec3-481d-be93-a71416502a7e",
+      "name": "Excel4"
+    },
+    {
+      "parameters": {
+        "name": "=Cari Kartdaki tanımlı plasiyere göre",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -592,
+        2992
+      ],
+      "id": "59c2b89f-669b-49d3-860a-efbd666c6286",
+      "name": "excel upload4",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        2992
+      ],
+      "id": "141e40a3-61eb-4a04-bed8-220e71a3c013",
+      "name": "Send text2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Cari Hareketlerindeki plasiyere göre",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -560,
+        3200
+      ],
+      "id": "076eeb57-070d-4294-bf86-edb8a6244c54",
+      "name": "excel upload5",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }}  Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        3200
+      ],
+      "id": "1c705cd6-373f-4194-8ec7-0e307b638f75",
+      "name": "Send text3",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Cari Borç Alacak",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -624,
+        3408
+      ],
+      "id": "98929e81-ba11-4f9d-9902-10d9c95bae5d",
+      "name": "excel upload6",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariHareketlerindekiplasiyeregöre\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"CariHareketlerindekiplasiyeregöre.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        3200
+      ],
+      "id": "adffbab7-8924-4704-afc4-93879d9f7ee8",
+      "name": "Excel7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariBorcAlacak\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"CariBorcAlacak.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -816,
+        3408
+      ],
+      "id": "6cc4a9a6-980b-45d7-8216-64a216a432fb",
+      "name": "Excel5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${JSON.stringify(input,null,2)}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariEkstra\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${h}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${val}</Data></Cell>`;\n  }\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"StokAnaliz.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        112
+      ],
+      "id": "1036b663-211a-469d-958b-155fab5bab8c",
+      "name": "Excel6"
+    },
+    {
+      "parameters": {
+        "name": "Stok Karlılık Analiz Raporu",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        816,
+        112
+      ],
+      "id": "63c14416-5277-4806-aebf-0819b7518bee",
+      "name": "excel upload7",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        976,
+        112
+      ],
+      "id": "6fd353e3-3bc4-40a5-9519-519a74bbee41",
+      "name": "Send text5",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec aris_stok_karlılık_analizi_exec @Ay ={{ $('Category').item.json.ay }};\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        112
+      ],
+      "id": "a88d6646-4093-4527-b66d-0f94de5e18fa",
+      "name": "Stok Karlılık"
+    },
+    {
+      "parameters": {
+        "content": "Plasiyer Borc Alacak",
+        "height": 624,
+        "width": 896,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        2944
+      ],
+      "id": "e1d0d431-fd45-4597-8d5d-163d1c305de3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC aris_StokDevirHizi_exec {{ $('Category').item.json.ay }}, 2025\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        -400
+      ],
+      "id": "5a3eb569-08dd-4e1e-8728-638b15c94887",
+      "name": "Stok devir hızı"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${JSON.stringify(input,null,2)}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariEkstra\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${h}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${val}</Data></Cell>`;\n  }\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"StokDevirHızı.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        -400
+      ],
+      "id": "09cf103b-a576-4b8b-9690-7545647b9f7f",
+      "name": "Excel8"
+    },
+    {
+      "parameters": {
+        "name": "Stok Devir Hızı",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -624,
+        -400
+      ],
+      "id": "5e77da5d-d85c-4714-916f-edb74ef28422",
+      "name": "excel upload8",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -400
+      ],
+      "id": "2c7f3772-fc94-43d6-be56-5398543a5440",
+      "name": "Send text6",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.data.instanceId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1584,
+        1952
+      ],
+      "id": "db4fa1d3-3905-47c0-9b85-417c45a5d2b3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "content": "Stok Devir Hızı",
+        "height": 256,
+        "width": 912,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        -464
+      ],
+      "id": "f25fafb6-63d4-480b-9182-a44b895f849d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://78.189.74.41:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-0DH21PVODRP1TA5SVXWMFK2J"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec nsp_netsesguncelle 2, 'ys0001',1,0,'e','h','2',-1,'H',0,0,'H'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1040,
+        448
+      ],
+      "id": "b5e36d03-c0a6-4649-9366-cf644b122709",
+      "name": "exec cümlle"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://78.189.74.41:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-0DH21PVODRP1TA5SVXWMFK2J"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC Aris_stokFifo 'Stok_Kodu = ''AMB-02''','01/01/2025','12/31/2025','X',0.0,'E',0,0,'H','E','T',0,'H'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -880,
+        448
+      ],
+      "id": "9942bdf7-a64a-4ffe-a616-e6078afc32d8",
+      "name": "Stok Fifo"
+    },
+    {
+      "parameters": {
+        "name": "Stok fifo",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        448
+      ],
+      "id": "2fb8ee8e-257c-499d-b69c-0f07348c67ed",
+      "name": "excel upload10",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        448
+      ],
+      "id": "a24e1e3b-6456-4030-8655-f043c9a4bd9a",
+      "name": "Send text8",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// --- XML güvenli karakter fonksiyonu\nfunction escapeXml(value) {\n  if (value === null || value === undefined) return \"\";\n  return value.toString()\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === \"object\") {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${JSON.stringify(input,null,2)}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Sütun genişlik hesaplama\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariEkstra\">\n<Table>`;\n\n// --- Sütun genişlikleri\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${escapeXml(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n      // Tarih formatı (ISO)\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        let d = new Date(val);\n        val = d.toISOString().replace(\"Z\", \"\"); // <-- önemli düzeltme\n      }\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${escapeXml(val)}</Data></Cell>`;\n  }\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"StokFifo.xml\"   // <-- .xml yapıldı, bozuk uyarısı kalkar\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        448
+      ],
+      "id": "3f54fa6c-91c9-4ed4-8593-de8cb2668c54",
+      "name": "Excel11"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"CariXyz\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"CariXyz.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        1904
+      ],
+      "id": "757f0de4-98f1-41e2-90b5-ee520bb86989",
+      "name": "Excel9"
+    },
+    {
+      "parameters": {
+        "name": "AbcXyz Cari Raporu",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -16,
+        1904
+      ],
+      "id": "97874cbb-590b-49c2-ba69-b2ccd13aec08",
+      "name": "excel upload9",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"exec dbo.Aris_ABC_XYZ_Cari\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        1904
+      ],
+      "id": "0c7aa3e0-d838-4477-9a26-bead8f137ef7",
+      "name": "carixyz"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"12aylıknetsatıs\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"12aylıknetsatıs.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        2560
+      ],
+      "id": "a787bb95-047b-424d-a96a-d63e87b2bdf9",
+      "name": "Excel10"
+    },
+    {
+      "parameters": {
+        "name": "12 Aylık Satış Raporu",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        2560
+      ],
+      "id": "f41255fa-2f82-4cc8-8cf0-ad6dd262ac6d",
+      "name": "excel upload11",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        2560
+      ],
+      "id": "5c2162f1-e177-4a7e-a389-82dbf3e16535",
+      "name": "Send text7",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC Aris_12_aylik_net_satis\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -976,
+        2560
+      ],
+      "id": "c13a9689-0b79-4477-b888-d87482fb4ce9",
+      "name": "12aylıksatıs"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }}  Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        3408
+      ],
+      "id": "b2546f73-2823-412b-a71d-3e27c52df819",
+      "name": "Send text9",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Stok Fifo",
+        "height": 224,
+        "width": 1632,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        400
+      ],
+      "id": "bd50e812-dae8-47ab-91d4-817f73b65c96",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Faliyet",
+        "height": 256,
+        "width": 864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        48
+      ],
+      "id": "4b8d5e19-d05a-4ef2-928b-864160ba0188",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC [dbo].[sp_YaslandirmaRaporu_PivotTarih] @baslangic_tarihi = '2024.01.01', @bitis_tarihi = '2025.20.11';\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        1744
+      ],
+      "id": "81db0285-5fe4-4f68-9cb0-b4a49f74067c",
+      "name": "Takvim Yaşlandırma"
+    },
+    {
+      "parameters": {
+        "content": "KULLANILMIYOR  \nGİTHUB\n  https://github.com/MetronetGroup/Aris-Yalcin-Oto",
+        "height": 1440,
+        "width": 2480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -720
+      ],
+      "id": "d8ce57ff-c52f-458c-8d0b-aefc0f47f012",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        1808
+      ],
+      "id": "dbfa440e-8799-4c36-be6f-a4a12714e0ba",
+      "name": "Category Mesajı",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Webhook'tan gelen output (string halinde)\nconst rawOutput = $input.first().json.output;\n\nlet category = null;\nlet ay = null;\nlet message = null;\n\n// 1) İçindeki JSON'ı REGEX ile yakala\nconst jsonMatch = rawOutput.match(/\\{[\\s\\S]*?\\}/);\n\nif (jsonMatch) {\n  try {\n    const parsed = JSON.parse(jsonMatch[0]);\n    category = parsed.category ?? null;\n    ay = parsed.ay ?? null;\n    message = parsed.mesaj ?? null;\n  } catch (e) {\n    message = \"JSON parse hatası: \" + e.message;\n  }\n}\n\n// 2) JSON dışındaki METNİ bul\nlet outsideText = rawOutput.replace(jsonMatch ? jsonMatch[0] : \"\", \"\").trim();\n\n// Eğer JSON içindeki message yoksa dış metni kullan\nif (!message && outsideText) {\n  message = outsideText;\n}\n\n// 3) Sonuç döndür\nreturn [\n  {\n    category,\n    ay,\n    message\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1424,
+        1712
+      ],
+      "id": "da76a370-3b01-461e-97c7-7edd3f135f4a",
+      "name": "Category"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bb8abb46-5965-4748-9382-e3365fa5dd9f",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1984,
+        1696
+      ],
+      "id": "8be74757-4e6a-42ed-a523-89554224d229",
+      "name": "FormMe"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        1904
+      ],
+      "id": "8a7ee636-5664-4aa2-89ca-19c4916e3d3f",
+      "name": "CariXyz",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"NakitAkıs\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"NakitAkıs.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        2080
+      ],
+      "id": "5a467e37-11f5-4ade-92b5-7e68f65bbf80",
+      "name": "Excel12"
+    },
+    {
+      "parameters": {
+        "name": "Nakit Akış",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        2080
+      ],
+      "id": "bb90ba39-3ba7-49b4-bc68-3bb770cfa3fb",
+      "name": "excel upload12",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC Aris_nakitakis @cari_kodu = NULL, @baslangic_tarihi = '2024-01-01'\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        2080
+      ],
+      "id": "ec05d8af-583b-4193-a9e5-4cefa88a3d35",
+      "name": "Nakit Akış"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        2080
+      ],
+      "id": "37eadc87-fa0a-4a63-98a8-1bd9a88a5c53",
+      "name": "NakitAkıs",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data;\n\n// XML için escape fonksiyonu (EN KRİTİK DÜZELTME)\nfunction xmlEscape(str) {\n  return String(str)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&apos;\");\n}\n\nlet items = [];\nif (Array.isArray(input)) {\n  items = input;\n} else if (typeof input === 'object') {\n  items = [input];\n}\n\nif (items.length === 0) {\n  const debugHtml = `<html><body><h3>Veri bulunamadı</h3><pre>${xmlEscape(JSON.stringify(input,null,2))}</pre></body></html>`;\n  const base64 = Buffer.from(debugHtml, \"utf8\").toString(\"base64\");\n  return [{\n    json: { warning: \"No data found\" },\n    binary: { data: { data: base64, mimeType: \"text/html\", fileName: \"cari_ekstra_debug.html\" } }\n  }];\n}\n\n// --- Başlıkları çıkar\nconst headersSet = new Set();\nitems.forEach(obj => Object.keys(obj).forEach(k => headersSet.add(k)));\nconst headers = Array.from(headersSet);\n\n// --- Her sütun için genişlik hesapla\nconst columnWidths = headers.map(h => {\n  let maxLen = h.length;\n  for (const item of items) {\n    const val = item[h];\n    if (val !== null && val !== undefined) {\n      maxLen = Math.max(maxLen, val.toString().length);\n    }\n  }\n  return Math.max(50, maxLen * 7);\n});\n\n// --- XML Spreadsheet başlat\nlet xml = `<?xml version=\"1.0\"?>\n<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n<Styles>\n  <Style ss:ID=\"DateStyle\">\n    <NumberFormat ss:Format=\"yyyy-mm-dd\"/>\n  </Style>\n  <Style ss:ID=\"CurrencyStyle\">\n    <NumberFormat ss:Format=\"₺#,##0.00\"/>\n  </Style>\n  <Style ss:ID=\"NumberStyle\">\n    <NumberFormat ss:Format=\"#,##0.00\"/>\n  </Style>\n</Styles>\n<Worksheet ss:Name=\"Sipariş Öneri Raporu\">\n<Table>`;\n\n// --- Sütun genişliklerini ekle\nfor (const w of columnWidths) {\n  xml += `<Column ss:AutoFitWidth=\"0\" ss:Width=\"${w}\"/>`;\n}\n\n// --- Başlık satırı\nxml += \"<Row>\";\nfor (const h of headers) {\n  xml += `<Cell><Data ss:Type=\"String\">${xmlEscape(h)}</Data></Cell>`;\n}\nxml += \"</Row>\";\n\n// --- Veri satırları\nfor (const item of items) {\n  xml += \"<Row>\";\n\n  for (const h of headers) {\n    let val = item[h];\n    let cellType = \"String\";\n    let style = \"\";\n\n    if (val === null || val === undefined) val = \"\";\n\n    if (typeof val === \"number\") {\n      cellType = \"Number\";\n      style = ' ss:StyleID=\"NumberStyle\"';\n    } else if (typeof val === \"string\") {\n\n      // Tarih kontrolü\n      if (h.toLowerCase().includes(\"tarih\") && /^\\d{4}-\\d{2}-\\d{2}/.test(val)) {\n        cellType = \"DateTime\";\n        style = ' ss:StyleID=\"DateStyle\"';\n        val = new Date(val).toISOString();\n      }\n\n      // Parasal değer kontrolü\n      else if ([\"tutar\",\"borç\",\"borc\",\"alacak\",\"toplam\"].some(k => h.toLowerCase().includes(k))) {\n        const num = parseFloat(val.toString().replace(\",\", \".\"));\n        if (!isNaN(num)) {\n          cellType = \"Number\";\n          style = ' ss:StyleID=\"CurrencyStyle\"';\n          val = num;\n        }\n      }\n    }\n\n    // XML'e uygun şekilde hücre yazımı\n    if (cellType === \"DateTime\") {\n      xml += `<Cell${style}><Data ss:Type=\"DateTime\">${val}</Data></Cell>`;\n    } else {\n      xml += `<Cell${style}><Data ss:Type=\"${cellType}\">${xmlEscape(val)}</Data></Cell>`;\n    }\n  }\n\n  xml += \"</Row>\";\n}\n\nxml += \"</Table></Worksheet></Workbook>\";\n\n// --- Base64 encode\nconst base64 = Buffer.from(xml, \"utf8\").toString(\"base64\");\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: base64,\n      mimeType: \"application/vnd.ms-excel\",\n      fileName: \"Sipariş Öneri Raporu.xls\"\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        1584
+      ],
+      "id": "aa7c6cc4-728c-40f6-8e94-a2c3eb9b0e16",
+      "name": "Excel13"
+    },
+    {
+      "parameters": {
+        "name": "Sipariş Öneri Raporu ",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lokTTqz9S0jNDoibwQ4ElG5_b9pcltX2",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        1584
+      ],
+      "id": "8a1dac0d-be91-4952-aede-ed1f2f005c91",
+      "name": "excel upload13",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "iN9OE5UMYJ8poAVA",
+          "name": "Ücretli Hesap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://193.168.153.43:6089/execute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "RMX-HIEHWT2OF7BSGFX9MD7D565T"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"reportName\": \"Özel Rapor\",\n  \"query\": \"EXEC Aris_5Aylik_SiparisOnerisi\",\n  \"parameters\": {}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -336,
+        1584
+      ],
+      "id": "a7e30a98-472c-418a-a5d7-28708d45f0f5",
+      "name": "Siparis Önerisi"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook1').item.json.body.instance }}",
+        "remoteJid": "={{ $('Webhook1').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $('Category').item.json.category }} Raporunuz hazır. Aşağıdaki bağlantıdan ulaşabilirsiniz.\n\n{{ $json.webViewLink }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        1584
+      ],
+      "id": "7f9b3e35-237e-4d4c-8720-0af6513f7801",
+      "name": "Sipariş Önerisi",
+      "credentials": {
+        "evolutionApi": {
+          "id": "boMU56w93xgnxgsV",
+          "name": "emre"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Parse": {
+      "main": [
+        [
+          {
+            "node": "Excel1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "abcxyz",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Siparis Önerisi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Takvim Yaşlandırma",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ödeme/tahsilat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cari Hareketlerindeki plasiyere göre",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cari Kartdaki tanımlı plasiyere göre",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cari Borç Alacak",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "carixyz",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "12aylıksatıs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nakit Akış",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel1": {
+      "main": [
+        [
+          {
+            "node": "excel upload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload1": {
+      "main": [
+        [
+          {
+            "node": "YAŞLANDIRMA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "FormMe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "abcxyz": {
+      "main": [
+        [
+          {
+            "node": "Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel": {
+      "main": [
+        [
+          {
+            "node": "excel upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload": {
+      "main": [
+        [
+          {
+            "node": "ABC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Banka Bakiye": {
+      "main": [
+        [
+          {
+            "node": "mcekportfoy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mcektahsil": {
+      "main": [
+        [
+          {
+            "node": "msenetportfoy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "msenetportfoy": {
+      "main": [
+        [
+          {
+            "node": "msenettahsil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "msenettahsil": {
+      "main": [
+        [
+          {
+            "node": "Alıcılarbakiye",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alıcılarbakiye": {
+      "main": [
+        [
+          {
+            "node": "Satıcıcaribakiye",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Satıcıcaribakiye": {
+      "main": [
+        [
+          {
+            "node": "Kasa Kalan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "İçerik Düzenleme": {
+      "main": [
+        [
+          {
+            "node": "Whatsapp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whatsapp Message": {
+      "main": [
+        [
+          {
+            "node": "Faliyet Raporu Sonuç Gönderme",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kasa Kalan": {
+      "main": [
+        [
+          {
+            "node": "KrediKartıBAKIYE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KrediKartıBAKIYE": {
+      "main": [
+        [
+          {
+            "node": "mcek_bekleyen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mcek_bekleyen": {
+      "main": [
+        [
+          {
+            "node": "KDV dahil genel toplam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KDV dahil genel toplam": {
+      "main": [
+        [
+          {
+            "node": "İçerik Düzenleme",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PlasiyerAylıkSatısRaporu": {
+      "main": [
+        [
+          {
+            "node": "Excel2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel2": {
+      "main": [
+        [
+          {
+            "node": "excel upload2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload2": {
+      "main": [
+        [
+          {
+            "node": "Send text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mcekportfoy": {
+      "main": [
+        [
+          {
+            "node": "mcektahsil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Merhaba Mesajı",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Category Mesajı",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel3": {
+      "main": [
+        [
+          {
+            "node": "excel upload3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload3": {
+      "main": [
+        [
+          {
+            "node": "Send text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ödeme/tahsilat": {
+      "main": [
+        [
+          {
+            "node": "Excel3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cari Kartdaki tanımlı plasiyere göre": {
+      "main": [
+        [
+          {
+            "node": "Excel4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cari Hareketlerindeki plasiyere göre": {
+      "main": [
+        [
+          {
+            "node": "Excel7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cari Borç Alacak": {
+      "main": [
+        [
+          {
+            "node": "Excel5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel4": {
+      "main": [
+        [
+          {
+            "node": "excel upload4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload4": {
+      "main": [
+        [
+          {
+            "node": "Send text2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload5": {
+      "main": [
+        [
+          {
+            "node": "Send text3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload6": {
+      "main": [
+        [
+          {
+            "node": "Send text9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel7": {
+      "main": [
+        [
+          {
+            "node": "excel upload5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel5": {
+      "main": [
+        [
+          {
+            "node": "excel upload6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel6": {
+      "main": [
+        [
+          {
+            "node": "excel upload7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload7": {
+      "main": [
+        [
+          {
+            "node": "Send text5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stok Karlılık": {
+      "main": [
+        [
+          {
+            "node": "Excel6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stok devir hızı": {
+      "main": [
+        [
+          {
+            "node": "Excel8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel8": {
+      "main": [
+        [
+          {
+            "node": "excel upload8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload8": {
+      "main": [
+        [
+          {
+            "node": "Send text6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "exec cümlle": {
+      "main": [
+        [
+          {
+            "node": "Stok Fifo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stok Fifo": {
+      "main": [
+        [
+          {
+            "node": "Excel11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload10": {
+      "main": [
+        [
+          {
+            "node": "Send text8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send text8": {
+      "main": [
+        []
+      ]
+    },
+    "Excel11": {
+      "main": [
+        [
+          {
+            "node": "excel upload10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel9": {
+      "main": [
+        [
+          {
+            "node": "excel upload9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload9": {
+      "main": [
+        [
+          {
+            "node": "CariXyz",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "carixyz": {
+      "main": [
+        [
+          {
+            "node": "Excel9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel10": {
+      "main": [
+        [
+          {
+            "node": "excel upload11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload11": {
+      "main": [
+        [
+          {
+            "node": "Send text7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "12aylıksatıs": {
+      "main": [
+        [
+          {
+            "node": "Excel10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Takvim Yaşlandırma": {
+      "main": [
+        [
+          {
+            "node": "Data Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category Mesajı": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FormMe": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel12": {
+      "main": [
+        [
+          {
+            "node": "excel upload12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload12": {
+      "main": [
+        [
+          {
+            "node": "NakitAkıs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nakit Akış": {
+      "main": [
+        [
+          {
+            "node": "Excel12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel13": {
+      "main": [
+        [
+          {
+            "node": "excel upload13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "excel upload13": {
+      "main": [
+        [
+          {
+            "node": "Sipariş Önerisi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Siparis Önerisi": {
+      "main": [
+        [
+          {
+            "node": "Excel13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "df4caf53-d53f-4b83-be9f-230dd60285da",
+  "meta": {
+    "instanceId": "7a2a25a1f29ba61e7462cc2530df12acff17e658d10db3b4d31008d6225b17a4"
+  },
+  "id": "26xk5ckA8fZeeqzy",
+  "tags": []
+}
